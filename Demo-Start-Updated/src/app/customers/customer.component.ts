@@ -33,6 +33,12 @@ function ratingRange(min: number, max: number): ValidatorFn {
 export class CustomerComponent implements OnInit {
   customerForm: FormGroup;
   customer: Customer = new Customer();
+  emailMessage: string;
+
+  private validationMessages = {
+    required: 'Please enter your email address.',
+    email: 'Please enter a valid email address.'
+  };
 
   constructor(private fb: FormBuilder) { }
 
@@ -53,6 +59,11 @@ export class CustomerComponent implements OnInit {
     this.customerForm.get('notification').valueChanges.subscribe(value => {
       this.setNotification(value);
     });
+
+    const emailControl = this.customerForm.get('emailGroup.email');
+    emailControl.valueChanges.subscribe(value => {
+      this.setMessage(emailControl);
+    });
   }
 
   save() {
@@ -60,7 +71,7 @@ export class CustomerComponent implements OnInit {
     console.log('Saved: ' + JSON.stringify(this.customerForm.value));
   }
 
-  populateTestData() {
+  populateTestData(): void {
     this.customerForm.patchValue({
       firstName: 'Jack',
       lastName: 'Harkness',
@@ -76,5 +87,13 @@ export class CustomerComponent implements OnInit {
     }
 
     this.customerForm.controls.phone.updateValueAndValidity();
+  }
+
+  setMessage(c: AbstractControl): void {
+    this.emailMessage = '';
+    console.log(c);
+    if ((c.touched || c.dirty) && c.errors) {
+      this.emailMessage = Object.keys(c.errors).map(key => this.validationMessages[key]).join(' ');
+    }
   }
 }
